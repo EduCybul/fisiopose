@@ -4,14 +4,19 @@ import 'package:camera/camera.dart';
 
 import '../utils/isolate_utils.dart';
 import 'ai_model.dart';
-import 'pose_service.dart';
+import 'package:fisiopose/services/pose_service.dart';
 import 'service_locator.dart';
 
+enum Models {
+  faceDetection,
+  faceMesh,
+  hands,
+  pose,
+}
 
 class ModelInferenceService {
   late AiModel model;
   late Function handler;
-  late Pose poseService;
   Map<String, dynamic>? inferenceResults;
 
   Future<void> inference({
@@ -31,12 +36,12 @@ class ModelInferenceService {
     );
 
     inferenceResults = await responsePort.first;
-    print('Inference results: $inferenceResults');
     responsePort.close();
   }
 
-  void setModelConfig(int index) {
+  void setModelConfig(int index){
         model = locator<Pose>();
         handler = runPoseEstimator;
+
   }
 }

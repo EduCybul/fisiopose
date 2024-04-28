@@ -6,10 +6,7 @@ import 'package:fisiopose/Home.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupLocator();
-  Pose pose = Pose();
-  await pose.initialize();
-
-  runApp( Home());
+  runApp( const Home());
 
 
 }

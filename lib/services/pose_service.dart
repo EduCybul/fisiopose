@@ -5,20 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image_lib;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
-import 'package:fisiopose/model/model.dart';
+
 import '../../utils/image_utils.dart';
-import 'ai_model.dart';
+import 'package:fisiopose/services/ai_model.dart';
 
 // ignore: must_be_immutable
 class Pose extends AiModel {
   Interpreter? interpreter;
-  var model;
-  bool _isModelLoaded = false;
 
   Pose({this.interpreter}) {
-    initialize();
+    loadModel();
   }
-
   final int inputSize = 256;
   final double threshold = 0.8;
 
@@ -31,30 +28,12 @@ class Pose extends AiModel {
   @override
   Interpreter? get getInterpreter => interpreter;
 
-  Future<void> initialize() async {
-    await loadModel();
-  }
-
-  Future<void> loadModel() async {
-    if(!_isModelLoaded) {
-      print(
-          'Loading model'); // This will print a message when the model is being loaded
-      try {
-        interpreter = await Interpreter.fromAsset("models/flexionhombro90-frente.tflite");
-        _isModelLoaded = true;
-        //options: InterpreterOptions(threads: 1));
-      } catch (e) {
-        print('Failed to load model');
-      }
-    }
-  }
-  /*
   @override
   Future<void> loadModel() async {
     try {
       final interpreterOptions = InterpreterOptions();
 
-      interpreter ??= await Interpreter.fromAsset(ModelFile.flexion,
+      interpreter ??= await Interpreter.fromAsset('models/pose_landmark_full.tflite',
           options: interpreterOptions);
 
       final outputTensors = interpreter!.getOutputTensors();
@@ -66,7 +45,7 @@ class Pose extends AiModel {
     } catch (e) {
       log('Error while creating interpreter: $e');
     }
-  }*/
+  }
 
   @override
   TensorImage getProcessedImage(TensorImage inputImage) {
@@ -129,9 +108,9 @@ class Pose extends AiModel {
   }
 }
 
-
 Map<String, dynamic>? runPoseEstimator(Map<String, dynamic> params) {
-  final pose =Pose(interpreter: Interpreter.fromAddress(params['detectorAddress']));
+  final pose =
+  Pose(interpreter: Interpreter.fromAddress(params['detectorAddress']));
 
   final image = ImageUtils.convertCameraImage(params['cameraImage']);
   final result = pose.predict(image!);

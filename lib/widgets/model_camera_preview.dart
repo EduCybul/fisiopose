@@ -21,7 +21,6 @@ class ModelCameraPreview extends StatelessWidget {
   final Map<String, dynamic>? inferenceResults =
       locator<ModelInferenceService>().inferenceResults;
 
-
   @override
   Widget build(BuildContext context) {
     if (cameraController == null || !cameraController!.value.isInitialized) {
@@ -51,7 +50,6 @@ class ModelCameraPreview extends StatelessWidget {
       ],
     );
   }
-
 
   Widget get _drawPose => _ModelPainter(
     customPainter: PosePainter(
