@@ -13,6 +13,7 @@ class PosePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    Rect cliRect = Rect.fromLTWH(0, 0, size.width, size.height);
     print('LLamada al metodo paint');
     if (points.isNotEmpty) {
       print('Puntos no vacios');
@@ -38,6 +39,7 @@ class PosePainter extends CustomPainter {
         pointPaint,
       );
 
+
       canvas.drawPoints(
         PointMode.polygon,
         [
@@ -61,6 +63,7 @@ class PosePainter extends CustomPainter {
         ].map((point) => point * ratio).toList(),
         headPaint,
       );
+
 
       canvas.drawPoints(
         PointMode.polygon,

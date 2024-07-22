@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.1 <4.0.0'
+  sdk: '>=2.17.0 <3.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -41,6 +41,7 @@ dependencies:
   # tensorflow
   tflite_flutter: ^0.9.5
   tflite_flutter_helper: ^0.2.1
+  tflite_flutter_helper_plus: ^0.0.2
 
   # math
   scidart: ^0.0.2-dev.12
@@ -83,7 +84,9 @@ flutter:
      - assets/image/flexion-hombro.png
      - assets/models/flexionhombro90-frente.tflite
      - assets/models/pose_landmark_full.tflite
-     - assets/models/2.tflite
+     - assets/models/pose_landmarks_detector.tflite
+     - assets/models/singlepose-lightning.tflite
+     - assets/models/modified_pose_landmark_full.tflite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

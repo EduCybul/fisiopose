@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'package:image/image.dart' as img;
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,13 +8,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../services/model_inference_service.dart';
 import '../../services/service_locator.dart';
 import '../../utils/isolate_utils.dart';
-import 'package:fisiopose/widgets/model_camera_preview.dart';
+import '../widgets/model_camera_preview.dart';
+//import 'package:fisiopose/widgets/model_camera_preview.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({
     required this.index,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final int index;
 
@@ -27,15 +31,21 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   late bool _isRun;
   bool _predicting = false;
   bool _draw = false;
+  late double _minTextAdapt;
 
   late IsolateUtils _isolateUtils;
   late ModelInferenceService _modelInferenceService;
+  Uint8List? _captureImage;
 
   @override
   void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScreenUtil.init(context, designSize: const Size(360, 690));
+      _minTextAdapt = ScreenUtil().setSp(12);
+    });
     _modelInferenceService = locator<ModelInferenceService>();
     _initStateAsync();
-    super.initState();
   }
 
   void _initStateAsync() async {
@@ -99,6 +109,10 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    ScreenUtil.init(context, designSize: const Size(360, 690));
+    _minTextAdapt = ScreenUtil().setSp(12);
+
+
     return PopScope(
       canPop: true,
       onPopInvoked: (didPop) {
@@ -113,6 +127,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           cameraController: _cameraController,
           index: widget.index,
           draw: _draw,
+          imageData: _captureImage,
         ),
         floatingActionButton: _buildFloatingActionButton,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -142,6 +157,14 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         ),
       ),
       IconButton(
+        onPressed: () => _imageToggle,
+        color: Colors.white,
+        iconSize: ScreenUtil().setWidth(30.0),
+        icon: const Icon(
+          Icons.add_a_photo,
+        ),
+      ),
+      IconButton(
         onPressed: () => _imageStreamToggle,
         color: Colors.white,
         iconSize: ScreenUtil().setWidth(30.0),
@@ -152,6 +175,19 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     ],
   );
 
+  void get _imageToggle async {
+    final XFile imageFile = await _cameraController!.takePicture() ;
+    final Uint8List imageData = await imageFile.readAsBytes();
+
+    //final img.Image? image = img.decodeImage(imageData);
+    //final CameraImage convertedCameraimage = convertUint8ListToCameraImage(imageData);
+    setState(() {
+      _draw = true;
+      _captureImage = imageData;
+    });
+
+    await _inferenceWithImage(imageData );
+  }
   void get _imageStreamToggle {
     setState(() {
       _draw = !_draw;
@@ -180,7 +216,30 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       _onNewCameraSelected(_cameras.first);
     }
   }
+  Future<void> _inferenceWithImage(Uint8List imageData) async {
+    if (!mounted) return;
 
+    if (_modelInferenceService.model.getInterpreter != null) {
+      if (_predicting || !_draw) {
+        return;
+      }
+
+      setState(() {
+        _predicting = true;
+      });
+
+      if (_draw) {
+        await _modelInferenceService.inferenceWithUint8List(
+          isolateUtils: _isolateUtils,
+          imageData: imageData,
+        );
+      }
+
+      setState(() {
+        _predicting = false;
+      });
+    }
+  }
   Future<void> _inference({required CameraImage cameraImage}) async {
     if (!mounted) return;
 
@@ -205,4 +264,5 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       });
     }
   }
+
 }

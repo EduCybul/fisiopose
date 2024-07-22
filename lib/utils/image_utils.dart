@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as image_lib;
 
@@ -67,5 +69,11 @@ class ImageUtils {
     ((b << 16) & 0xff0000) |
     ((g << 8) & 0xff00) |
     (r & 0xff);
+  }
+
+
+  // Nuevo método para convertir Uint8List
+  static image_lib.Image? convertUint8List(Uint8List imageData) {
+    return image_lib.decodeImage(imageData);
   }
 }

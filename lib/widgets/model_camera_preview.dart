@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -10,12 +12,14 @@ class ModelCameraPreview extends StatelessWidget {
     required this.cameraController,
     required this.index,
     required this.draw,
-    Key? key,
-  }) : super(key: key);
+    this.imageData,
+    super.key,
+  });
 
   final CameraController? cameraController;
   final int index;
   final bool draw;
+  final Uint8List? imageData;
 
   late final double _ratio;
   final Map<String, dynamic>? inferenceResults =
@@ -23,6 +27,9 @@ class ModelCameraPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (imageData !=null) {
+      return Image.memory(imageData!);
+    }
     if (cameraController == null || !cameraController!.value.isInitialized) {
       return Container(
         color: Colors.black,
@@ -62,8 +69,8 @@ class ModelCameraPreview extends StatelessWidget {
 class _ModelPainter extends StatelessWidget {
   const _ModelPainter({
     required this.customPainter,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final CustomPainter customPainter;
 

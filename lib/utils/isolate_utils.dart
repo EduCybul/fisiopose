@@ -18,14 +18,22 @@ class IsolateUtils {
   }
 
   static void _entryPoint(SendPort mainSendPort) async {
+    print("Isolate entry point started"); // Step 3: Confirm entry point is called
     final childReceivePort = ReceivePort();
     mainSendPort.send(childReceivePort.sendPort);
 
     await for (final _IsolateData? isolateData in childReceivePort) {
       if (isolateData != null) {
-        final results = isolateData.handler(isolateData.params);
-        isolateData.responsePort.send(results);
-      }
+        print("Received message: ${isolateData.params}"); // Step 4: Log received message
+  try {
+    final results = isolateData.handler(isolateData.params);
+    print("Isolate results: $results"); // Log the results
+    isolateData.responsePort.send(results);
+  }catch (e){
+    print("Error in isolate: $e");
+    isolateData.responsePort.send(null);
+  }
+  }
     }
   }
 
