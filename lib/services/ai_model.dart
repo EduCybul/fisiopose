@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:equatable/equatable.dart';
 import 'package:image/image.dart' as image_lib;
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -10,6 +12,9 @@ abstract class AiModel extends Equatable {
   final outputShapes = <List<int>>[];
   final outputTypes = <TfLiteType>[];
 
+  final outputTypesfisio = <TfLiteType>[];
+  final outputShapesfisio = <List<int>>[];
+
   Interpreter? getInterpreter;
 
   @override
@@ -20,4 +25,6 @@ abstract class AiModel extends Equatable {
   Future<void> loadModel();
   TensorImage getProcessedImage(TensorImage inputImage);
   Map<String, dynamic>? predict(image_lib.Image image);
+  Map<String, dynamic>? predictfisio(List<Offset> landmarks);
+  Future<void> loadmodelfisio();
 }

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:image/image.dart' as img;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,8 @@ import '../../services/model_inference_service.dart';
 import '../../services/service_locator.dart';
 import '../../utils/isolate_utils.dart';
 import '../widgets/model_camera_preview.dart';
+import '../widgets/model_camera_preview.dart' as model_camera_preview;
+
 //import 'package:fisiopose/widgets/model_camera_preview.dart';
 
 class CameraPage extends StatefulWidget {
@@ -34,8 +35,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   late double _minTextAdapt;
 
   late IsolateUtils _isolateUtils;
+  late IsolateUtils _isolateUtilsImage;
+  late IsolateUtils _isolateUtilsFisio;
   late ModelInferenceService _modelInferenceService;
+
   Uint8List? _captureImage;
+  final GlobalKey<ModelCameraPreviewState> _modelCameraPreviewKey = GlobalKey<ModelCameraPreviewState>();
 
   @override
   void initState() {
@@ -50,7 +55,11 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   void _initStateAsync() async {
     _isolateUtils = IsolateUtils();
+    _isolateUtilsImage = IsolateUtils();
+    _isolateUtilsFisio = IsolateUtils();
+    await _isolateUtilsImage.initIsolate();
     await _isolateUtils.initIsolate();
+    await _isolateUtilsFisio.initIsolate();
     await _initCamera();
     _predicting = false;
   }
@@ -60,7 +69,11 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     _cameraController?.dispose();
     _cameraController = null;
     _isolateUtils.dispose();
+    _isolateUtilsImage.dispose();
+    _isolateUtilsFisio.dispose();
     _modelInferenceService.inferenceResults = null;
+
+
     super.dispose();
   }
 
@@ -124,6 +137,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         backgroundColor: Colors.black,
         appBar: _buildAppBar,
         body: ModelCameraPreview(
+          key: _modelCameraPreviewKey,
           cameraController: _cameraController,
           index: widget.index,
           draw: _draw,
@@ -186,18 +200,28 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       _captureImage = imageData;
     });
 
+
     await _inferenceWithImage(imageData );
+    final points = locator<ModelInferenceService>().inferenceResultsImage?['point']
+        ?? locator<ModelInferenceService>().inferenceResults?['point'] ?? [];
+    _modelCameraPreviewKey.currentState?.updateInferenceResults(points);
   }
-  void get _imageStreamToggle {
+  void get  _imageStreamToggle{
     setState(() {
       _draw = !_draw;
     });
 
     _isRun = !_isRun;
     if (_isRun) {
+
       _cameraController!.startImageStream(
-            (CameraImage cameraImage) async =>
-        await _inference(cameraImage: cameraImage),
+            (CameraImage cameraImage) async {
+              await _inference(cameraImage: cameraImage);
+              final points = locator<ModelInferenceService>().inferenceResultsImage?['point']
+                  ?? locator<ModelInferenceService>().inferenceResults?['point'] ?? [];
+              print('Points from inference: $points');
+              _modelCameraPreviewKey.currentState?.updateInferenceResults(points);
+            },
       );
     } else {
       _cameraController!.stopImageStream();
@@ -219,21 +243,33 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   Future<void> _inferenceWithImage(Uint8List imageData) async {
     if (!mounted) return;
 
-    if (_modelInferenceService.model.getInterpreter != null) {
+    if (_modelInferenceService.pose.interpreter!= null) {
       if (_predicting || !_draw) {
         return;
       }
 
       setState(() {
         _predicting = true;
+        _draw=true;
       });
 
       if (_draw) {
+        print('Starting inference with Image');
         await _modelInferenceService.inferenceWithUint8List(
-          isolateUtils: _isolateUtils,
+          isolateUtils: _isolateUtilsImage,
           imageData: imageData,
         );
+        print("Inference Image done");
       }
+      final points = locator<ModelInferenceService>().inferenceResultsImage?['point']
+          ?? locator<ModelInferenceService>().inferenceResults?['point'] ?? [];
+      await _modelInferenceService.inferenceFisio(
+        isolateUtils: _isolateUtilsFisio,
+        landmarksResults: points.cast<Offset>(),
+      );
+      final fisioresult = locator<ModelInferenceService>().inferenceResultsFisio?['point'];
+      _modelCameraPreviewKey.currentState?.updateInferenceResults(points);
+      _modelCameraPreviewKey.currentState?.updateInferenceResults(fisioresult);
 
       setState(() {
         _predicting = false;
@@ -243,7 +279,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   Future<void> _inference({required CameraImage cameraImage}) async {
     if (!mounted) return;
 
-    if (_modelInferenceService.model.getInterpreter != null) {
+    if (_modelInferenceService.pose.interpreter!= null) {
       if (_predicting || !_draw) {
         return;
       }
@@ -253,11 +289,28 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       });
 
       if (_draw) {
+        print('Starting inference with camera image Stream');
         await _modelInferenceService.inference(
           isolateUtils: _isolateUtils,
           cameraImage: cameraImage,
         );
+        print('Inference done');
+
+        final points = locator<ModelInferenceService>().inferenceResultsImage?['point']
+            ?? locator<ModelInferenceService>().inferenceResults?['point'] ?? [];
+        await _modelInferenceService.inferenceFisio(
+          isolateUtils: _isolateUtilsFisio,
+          landmarksResults: points,
+        );
+        final fisioresult = locator<ModelInferenceService>().inferenceResultsFisio?['point'];
+        _modelCameraPreviewKey.currentState?.updateInferenceResults(points);
+        _modelCameraPreviewKey.currentState?.updateInferenceResults(fisioresult);
+
+
       }
+      //final points = locator<ModelInferenceService>().inferenceResultsImage?['point'] ?? locator<ModelInferenceService>().inferenceResults?['point'];
+      //print('Points from streaming inference: $points');
+      //_modelCameraPreviewKey.currentState?.updateInferenceResults(points);
 
       setState(() {
         _predicting = false;

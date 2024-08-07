@@ -73,7 +73,7 @@ class ListMovements extends StatelessWidget{
   }
 
   void _onTapCamera(BuildContext context){
-    locator<ModelInferenceService>().setModelConfig(index);
+    //locator<ModelInferenceService>().setModelConfig(index);
     Navigator.push(
       context,
       MaterialPageRoute(

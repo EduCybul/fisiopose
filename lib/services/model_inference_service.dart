@@ -1,17 +1,31 @@
 import 'dart:isolate';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:camera/camera.dart';
 
 import '../utils/isolate_utils.dart';
 import 'ai_model.dart';
 import 'package:fisiopose/services/pose_service.dart';
+import 'package:fisiopose/services/pose_service.dart' as pose;
+
 import 'service_locator.dart';
 
 class ModelInferenceService {
-  late AiModel model;
-  late Function handler;
+late  Pose pose;
+
+ModelInferenceService(){
+  pose =Pose();
+}
+Pose get getPose => pose;
+
   Map<String, dynamic>? inferenceResults;
+
+  late Function handlerImage;
+  Map<String, dynamic>? inferenceResultsImage;
+
+  late Function handlerFisio;
+  Map<String, dynamic>? inferenceResultsFisio;
 
   Future<void> inference({
     required IsolateUtils isolateUtils,
@@ -20,10 +34,10 @@ class ModelInferenceService {
     final responsePort = ReceivePort();
 
     isolateUtils.sendMessage(
-      handler: handler,
+      handler: runPoseEstimator,
       params: {
         'cameraImage': cameraImage,
-        'detectorAddress': model.getAddress,
+        'detectorAddress': pose.interpreter!.address,
       },
       sendPort: isolateUtils.sendPort,
       responsePort: responsePort,
@@ -39,22 +53,44 @@ class ModelInferenceService {
     final responsePort = ReceivePort();
 
     isolateUtils.sendMessage(
-      handler: handler,
+      handler: runPoseEstimator,
       params: {
         'imageData': imageData,
-        'detectorAddress': model.getAddress,
+        'detectorAddress': pose.interpreterfisio!.address,
       },
       sendPort: isolateUtils.sendPort,
       responsePort: responsePort,
     );
 
-    inferenceResults = await responsePort.first;
+    inferenceResultsImage = await responsePort.first;
     responsePort.close();
   }
+  Future<void> inferenceFisio({
+    required IsolateUtils isolateUtils,
+    required List<Offset> landmarksResults,
+  }) async {
+    final responsePort = ReceivePort();
 
+    isolateUtils.sendMessage(
+      handler: runPoseEstimatorFisio,
+      params: {
+        'landmarks': landmarksResults,
+        'detectorAddress': pose.interpreterfisio!.address,
+      },
+      sendPort: isolateUtils.sendPort,
+      responsePort: responsePort,
+    );
+
+    inferenceResultsFisio  = await responsePort.first;
+    responsePort.close();
+  }
+  /*
   void setModelConfig(int index){
         model = locator<Pose>();
         handler = runPoseEstimator;
+        handlerImage = runPoseEstimator;
+        handlerFisio = pose.runPoseEstimatorFisio;
 
   }
+  */
 }
