@@ -81,12 +81,19 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
      - assets/image/fisio.png
-     - assets/image/flexion-hombro.png
+     - assets/image/flexion-hombro-derecho.png
+     - assets/image/flexion-hombro-izquierdo.png
      - assets/models/flexionhombro90-frente.tflite
      - assets/models/pose_landmark_full.tflite
      - assets/models/pose_landmarks_detector.tflite
      - assets/models/singlepose-lightning.tflite
      - assets/models/modified_pose_landmark_full.tflite
+     - assets/image/flexion-codos.png
+     - assets/image/abduccion-hombro.jpg
+     - assets/image/flexion_hombro_frontal.png
+     - assets/image/flexion-cadera-derecha.png
+     - assets/image/flexion-cadera-izquierda.png
+     - assets/image/flexion-muneca-derecha.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

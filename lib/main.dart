@@ -6,6 +6,4 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupLocator();
   runApp( const Home());
-
-
 }

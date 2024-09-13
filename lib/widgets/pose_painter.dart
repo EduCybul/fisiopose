@@ -19,7 +19,7 @@ class PosePainter extends CustomPainter {
       print('Puntos no vacios');
       var pointPaint = Paint()
         ..color = Colors.black
-        ..strokeWidth = 8;
+        ..strokeWidth = 8 ;
       var headPaint = Paint()
         ..color = Colors.deepOrange
         ..strokeWidth = 2;
@@ -43,7 +43,7 @@ class PosePainter extends CustomPainter {
       canvas.drawPoints(
         PointMode.polygon,
         [
-          points[8],
+          points[0],
           points[6],
           points[5],
           points[4],

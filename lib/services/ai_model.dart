@@ -12,9 +12,6 @@ abstract class AiModel extends Equatable {
   final outputShapes = <List<int>>[];
   final outputTypes = <TfLiteType>[];
 
-  final outputTypesfisio = <TfLiteType>[];
-  final outputShapesfisio = <List<int>>[];
-
   Interpreter? getInterpreter;
 
   @override
@@ -25,6 +22,5 @@ abstract class AiModel extends Equatable {
   Future<void> loadModel();
   TensorImage getProcessedImage(TensorImage inputImage);
   Map<String, dynamic>? predict(image_lib.Image image);
-  Map<String, dynamic>? predictfisio(List<Offset> landmarks);
-  Future<void> loadmodelfisio();
+
 }

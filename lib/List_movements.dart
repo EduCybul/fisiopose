@@ -13,7 +13,7 @@ class ListMovements extends StatelessWidget{
   Widget build (context){
     return Scaffold(
       appBar: AppBar(
-        title: const Text('List of movements'),
+        title: const Text('Lista de movimientos'),
         backgroundColor: Colors.deepPurple,
         titleTextStyle:
         const TextStyle(
@@ -36,34 +36,14 @@ class ListMovements extends StatelessWidget{
               return GridView.count(
                   crossAxisCount: 2,
                   children: [
-                    //FIRST POSE
-                    InkWell(
-                      onTap: () => _onTapCamera(innerContext),
-                      child:Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children:
-                          [
-                            Image.asset('assets/image/flexion-hombro.png'),
-                            const Text('Flexion de hombro', style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-
-                            ),),
-                          ],
-                        ),
-                      ),
-                    ),
-                    //SECOND POSE
-                    InkWell(
-                      onTap:() { ScaffoldMessenger.of(innerContext).showSnackBar(
-                        const SnackBar(
-                          content: Text('Tap'),
-                        ),);
-                      },
-                      child:Image.asset('assets/image/fisio.png'),
-                    )
-                  ]
+                      _movementItem(innerContext, 'assets/image/flexion-hombro-derecho.png', 'Flexion hombro derecho'),
+                      _movementItem(innerContext, 'assets/image/flexion-hombro-izquierdo.png', 'Flexion hombro izquierdo'),
+                      _movementItem(innerContext, 'assets/image/flexion-cadera-izquierda.png', 'Flexion cadera izquierda'),
+                      _movementItem(innerContext, 'assets/image/flexion-cadera-derecha.png', 'Flexion cadera derecha'),
+                      _movementItem(innerContext, 'assets/image/flexion-codos.png', 'Flexion codo'),
+                      _movementItem(innerContext, 'assets/image/abduccion-hombro.jpg', 'Abduccion hombro'),
+                    _movementItem(innerContext, 'assets/image/flexion-muneca-derecha.jpeg', 'Flexion muneca derecha'),
+                    ]
               );
             }
         ),
@@ -71,13 +51,38 @@ class ListMovements extends StatelessWidget{
     );
 
   }
+  Widget _movementItem(BuildContext context, String imagepath, String title ){
+    return InkWell(
+      onTap : () => _onTapCamera(context, title),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            Image.asset(imagepath, scale: 2),
+            Text(
+              title,
+              style: const TextStyle(
+                backgroundColor: Colors.black,
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
 
-  void _onTapCamera(BuildContext context){
+        )
+      )
+    );
+
+  }
+
+
+  void _onTapCamera(BuildContext context, String movement){
     //locator<ModelInferenceService>().setModelConfig(index);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CameraPage(index: index),
+        builder: (context) => CameraPage(movement: movement),
       ),
     );
   }
