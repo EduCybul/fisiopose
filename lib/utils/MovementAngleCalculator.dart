@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:fisiopose/utils/Movement.dart';
+
 enum MovementType {
   Flexion_hombro_derecho,
   Flexion_hombro_izquierdo,
@@ -22,20 +24,31 @@ class MovementAngleCalculator {
     MovementType.Flexion_muneca_derecha: [18, 16, 14],
   };
 
-  double calculateAngle(List<Offset> keypoints, MovementType movementType) {
-    final keypointIndexes = movementKeypoints[movementType]!;
+  double calculateAngle(MovementType movementName, List<Offset> keypoints) {
+    final keypointIndexes = movementKeypoints[movementName];
 
-    if (keypointIndexes.length < 3) {
-      throw Exception('Requiered keypoints missing');
+    if (keypointIndexes == null || keypointIndexes.length < 3) {
+      throw Exception('Required keypoints missing');
     }
 
-    final keypoint1 = keypoints[keypointIndexes[0]]!;
-    final keypoint2 = keypoints[keypointIndexes[1]]!;
-    final keypoint3 = keypoints[keypointIndexes[2]]!;
+    final keypoint1 = keypoints[keypointIndexes[0]];
+    final keypoint2 = keypoints[keypointIndexes[1]];
+    final keypoint3 = keypoints[keypointIndexes[2]];
 
-    final angle = _calculateAngle(keypoint1, keypoint2, keypoint3);
-    return angle;
+    return _calculateAngle(keypoint1, keypoint2, keypoint3);
+  }
 
+  double calculateAngleFromObject(Movement movement, List<Offset> keypoints) {
+    final keypointIndexes = movement.keypoints;
+    if (keypointIndexes.length < 3) {
+      throw Exception('Required keypoints missing');
+    }
+
+    final keypoint1 = keypoints[keypointIndexes[0]];
+    final keypoint2 = keypoints[keypointIndexes[1]];
+    final keypoint3 = keypoints[keypointIndexes[2]];
+
+    return _calculateAngle(keypoint1, keypoint2, keypoint3);
   }
 
   double _calculateAngle(Offset pointA, Offset pointB, Offset pointC) {

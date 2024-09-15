@@ -1,3 +1,4 @@
+import 'package:fisiopose/pages/PointSelectionPage.dart';
 import 'package:fisiopose/pages/camera_page.dart';
 import 'package:fisiopose/services/model_inference_service.dart';
 import 'package:fisiopose/services/service_locator.dart';
@@ -43,6 +44,7 @@ class ListMovements extends StatelessWidget{
                       _movementItem(innerContext, 'assets/image/flexion-codos.png', 'Flexion codo'),
                       _movementItem(innerContext, 'assets/image/abduccion-hombro.jpg', 'Abduccion hombro'),
                     _movementItem(innerContext, 'assets/image/flexion-muneca-derecha.jpeg', 'Flexion muneca derecha'),
+                    _addNewMovementItem(innerContext),
                     ]
               );
             }
@@ -76,6 +78,43 @@ class ListMovements extends StatelessWidget{
 
   }
 
+  Widget _addNewMovementItem(BuildContext context) {
+    return InkWell(
+      onTap: () => _onTapAddNewMovement(context),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: const [
+            Icon(
+              Icons.add_circle_outline,
+              size: 50,
+              color: Colors.white,
+            ),
+            Text(
+              'Añadir nuevo movimiento',
+              style: TextStyle(
+                backgroundColor: Colors.black,
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onTapAddNewMovement(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PointSelectionPage(), // Navigate to the new page
+      ),
+    );
+  }
+}
 
   void _onTapCamera(BuildContext context, String movement){
     //locator<ModelInferenceService>().setModelConfig(index);
@@ -87,4 +126,3 @@ class ListMovements extends StatelessWidget{
     );
   }
 
-}

@@ -94,6 +94,7 @@ flutter:
      - assets/image/flexion-cadera-derecha.png
      - assets/image/flexion-cadera-izquierda.png
      - assets/image/flexion-muneca-derecha.jpeg
+     - assets/image/pose_landmarks_index.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

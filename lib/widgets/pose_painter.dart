@@ -13,15 +13,17 @@ class PosePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Rect cliRect = Rect.fromLTWH(0, 0, size.width, size.height);
     print('LLamada al metodo paint');
-    if (points.isNotEmpty) {
+
+    //List<Offset> points = points;
+
+    if (points!.isNotEmpty) {
       print('Puntos no vacios');
       var pointPaint = Paint()
-        ..color = Colors.black
+        ..color = Colors.red
         ..strokeWidth = 8 ;
       var headPaint = Paint()
-        ..color = Colors.deepOrange
+        ..color = Colors.black
         ..strokeWidth = 2;
       var leftPaint = Paint()
         ..color = Colors.lightBlue
@@ -30,7 +32,7 @@ class PosePainter extends CustomPainter {
         ..color = Colors.yellow
         ..strokeWidth = 2;
       var bodyPaint = Paint()
-        ..color = Colors.pink
+        ..color = Colors.green
         ..strokeWidth = 2;
 
       canvas.drawPoints(
@@ -63,7 +65,6 @@ class PosePainter extends CustomPainter {
         ].map((point) => point * ratio).toList(),
         headPaint,
       );
-
 
       canvas.drawPoints(
         PointMode.polygon,

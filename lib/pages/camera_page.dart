@@ -2,21 +2,26 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
+import 'package:fisiopose/utils/Movement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../services/model_inference_service.dart';
 import '../../services/service_locator.dart';
 import '../../utils/isolate_utils.dart';
+import '../utils/Movement.dart';
+import '../utils/Movement.dart';
 import '../widgets/model_camera_preview.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({
-    required this.movement,
+    this.movement = '',
+    this.MovementObject,
     super.key,
   });
 
   final String movement;
+  final Movement? MovementObject;
 
   @override
   State<CameraPage> createState() => _CameraPageState();
@@ -145,7 +150,8 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         body: ModelCameraPreview(
           key: _modelCameraPreviewKey,
           cameraController: _cameraController,
-          movement: widget.movement ,
+          movement: widget.movement.isNotEmpty ? widget.movement : null,
+          MovementObject: widget.MovementObject,
           draw: _draw,
           imageData: _captureImage,
         ),

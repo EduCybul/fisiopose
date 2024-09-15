@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
+import 'package:fisiopose/utils/Movement.dart';
 import 'package:flutter/material.dart';
 import '../../../services/model_inference_service.dart';
 import '../../../services/service_locator.dart';
@@ -11,12 +12,14 @@ class ModelCameraPreview extends StatefulWidget {
     super.key,
     required this.cameraController,
     required this.movement,
+    required this.MovementObject,
     required this.draw,
     this.imageData,
   });
 
   final CameraController? cameraController;
-  final String movement;
+  final String? movement;
+  final Movement? MovementObject;
   final bool draw;
   final Uint8List? imageData;
 
@@ -89,7 +92,7 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
 
     try {
 
-      return _angleCalculator.calculateAngle(points,movementType);
+      return _angleCalculator.calculateAngle(movementType,points);
     } catch (e) {
       print('Error calculating angle: $e');
       return null;
@@ -116,8 +119,12 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
     //final keypoints = _extractKeypoints(inferenceResults);
 
     double? angle;
-    if(points != null){
-      angle = _calculateAngleForMovement(widget.movement, points);
+    if (points.isNotEmpty) {
+      if (widget.movement != null) {
+        angle = _calculateAngleForMovement(widget.movement!, points);
+      } else if (widget.MovementObject != null) {
+        angle = _angleCalculator.calculateAngleFromObject(widget.MovementObject!, points);
+      }
     }
 
     return Stack(
