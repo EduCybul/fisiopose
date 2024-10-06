@@ -9,18 +9,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../services/model_inference_service.dart';
 import '../../services/service_locator.dart';
 import '../../utils/isolate_utils.dart';
-import '../utils/Movement.dart';
-import '../utils/Movement.dart';
+
 import '../widgets/model_camera_preview.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({
-    this.movement = '',
-    this.MovementObject,
-    super.key,
+    super.key, required this.MovementObject,
   });
 
-  final String movement;
   final Movement? MovementObject;
 
   @override
@@ -35,7 +31,6 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   late bool _isRun;
   bool _predicting = false;
   bool _draw = false;
-  late double _minTextAdapt;
 
   late IsolateUtils _isolateUtils;
   late IsolateUtils _isolateUtilsImage;
@@ -48,7 +43,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScreenUtil.init(context, designSize: const Size(360, 690));
-      _minTextAdapt = ScreenUtil().setSp(12);
+     // _minTextAdapt = ScreenUtil().setSp(12);
     });
     _modelInferenceService = locator<ModelInferenceService>();
     _inititalizeServices();
@@ -134,7 +129,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(360, 690));
-    _minTextAdapt = ScreenUtil().setSp(12);
+    //_minTextAdapt = ScreenUtil().setSp(12);
 
 
     return PopScope(
@@ -150,8 +145,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         body: ModelCameraPreview(
           key: _modelCameraPreviewKey,
           cameraController: _cameraController,
-          movement: widget.movement.isNotEmpty ? widget.movement : null,
-          MovementObject: widget.MovementObject,
+          movement: widget.MovementObject,
           draw: _draw,
           imageData: _captureImage,
         ),
@@ -163,10 +157,10 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   AppBar get _buildAppBar => AppBar(
     title: Text(
-      'Title',
+       widget.MovementObject?.movementName ?? '',
       style: TextStyle(
-          color: Colors.white,
-          fontSize: ScreenUtil().setSp(28),
+          color: Colors.black,
+          fontSize: ScreenUtil().setSp(20),
           fontWeight: FontWeight.bold),
     ),
   );

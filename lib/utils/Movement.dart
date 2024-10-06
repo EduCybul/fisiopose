@@ -8,4 +8,9 @@ class Movement {
     required this.keypoints,
     required this.maxAngle,
   });
+
+  double calculateCompletionPercentage(double currentAngle) {
+    return (currentAngle / maxAngle) * 100;
+  }
+
 }

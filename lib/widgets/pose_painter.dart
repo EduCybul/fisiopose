@@ -17,7 +17,7 @@ class PosePainter extends CustomPainter {
 
     //List<Offset> points = points;
 
-    if (points!.isNotEmpty) {
+    if (points.isNotEmpty) {
       print('Puntos no vacios');
       var pointPaint = Paint()
         ..color = Colors.red

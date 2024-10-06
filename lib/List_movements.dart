@@ -1,27 +1,48 @@
 import 'package:fisiopose/pages/PointSelectionPage.dart';
 import 'package:fisiopose/pages/camera_page.dart';
-import 'package:fisiopose/services/model_inference_service.dart';
-import 'package:fisiopose/services/service_locator.dart';
 import 'package:flutter/material.dart';
+import 'package:fisiopose/utils/Movement.dart';
 
+import 'Start.dart';
 
-
-class ListMovements extends StatelessWidget{
+class ListMovements extends StatefulWidget {
   const ListMovements({super.key, required this.index});
 
   final int index;
+
   @override
-  Widget build (context){
+  _ListMovementsState createState() => _ListMovementsState();
+}
+
+class _ListMovementsState extends State<ListMovements> {
+  List<Movement> movements = [
+    Movement(movementName: 'Flexion hombro derecho', keypoints: [14, 12, 24], maxAngle: 90),
+    Movement(movementName: 'Flexion hombro izquierdo', keypoints: [13, 11, 23], maxAngle: 90),
+    Movement(movementName: 'Flexion cadera izquierda', keypoints: [28, 24, 27], maxAngle: 90),
+    Movement(movementName: 'Flexion cadera derecha', keypoints: [27, 23, 28], maxAngle: 90),
+    Movement(movementName: 'Flexion codo', keypoints: [16, 14, 12], maxAngle: 90),
+    Movement(movementName: 'Abduccion hombro', keypoints: [14, 12, 24], maxAngle: 90),
+    Movement(movementName: 'Flexion muneca derecha', keypoints: [18, 16, 14], maxAngle: 90),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Lista de movimientos'),
         backgroundColor: Colors.deepPurple,
-        titleTextStyle:
-        const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-            color: Colors.black
+        titleTextStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+          color: Colors.black,
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: ()  => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Start(() {})),
+              ),
+            ),
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -32,97 +53,101 @@ class ListMovements extends StatelessWidget{
             tileMode: TileMode.mirror,
           ),
         ),
-        child: Builder(
-            builder: (BuildContext innerContext) {
-              return GridView.count(
-                  crossAxisCount: 2,
-                  children: [
-                      _movementItem(innerContext, 'assets/image/flexion-hombro-derecho.png', 'Flexion hombro derecho'),
-                      _movementItem(innerContext, 'assets/image/flexion-hombro-izquierdo.png', 'Flexion hombro izquierdo'),
-                      _movementItem(innerContext, 'assets/image/flexion-cadera-izquierda.png', 'Flexion cadera izquierda'),
-                      _movementItem(innerContext, 'assets/image/flexion-cadera-derecha.png', 'Flexion cadera derecha'),
-                      _movementItem(innerContext, 'assets/image/flexion-codos.png', 'Flexion codo'),
-                      _movementItem(innerContext, 'assets/image/abduccion-hombro.jpg', 'Abduccion hombro'),
-                    _movementItem(innerContext, 'assets/image/flexion-muneca-derecha.jpeg', 'Flexion muneca derecha'),
-                    _addNewMovementItem(innerContext),
-                    ]
-              );
+        child: ListView.builder(
+          itemCount: movements.length + 1,
+          itemBuilder: (context, index) {
+            if (index == movements.length) {
+              return _addNewMovementItem(context);
+            } else {
+              return _movementItem(context, movements[index]);
             }
+          },
         ),
       ),
     );
-
   }
-  Widget _movementItem(BuildContext context, String imagepath, String title ){
-    return InkWell(
-      onTap : () => _onTapCamera(context, title),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            Image.asset(imagepath, scale: 2),
-            Text(
-              title,
-              style: const TextStyle(
-                backgroundColor: Colors.black,
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.normal,
+
+  Widget _movementItem(BuildContext context, Movement movement) {
+    return Card(
+      margin: const EdgeInsets.all(10.0),
+      child: InkWell(
+        onTap: () => _onTapCamera(context, movement),
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset('assets/image/fisio.png', scale: 10), // Placeholder image
+              const SizedBox(height: 10),
+              Text(
+                movement.movementName,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
-
-        )
-      )
+            ],
+          ),
+        ),
+      ),
     );
-
   }
 
   Widget _addNewMovementItem(BuildContext context) {
-    return InkWell(
-      onTap: () => _onTapAddNewMovement(context),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: const [
-            Icon(
-              Icons.add_circle_outline,
-              size: 50,
-              color: Colors.white,
-            ),
-            Text(
-              'Añadir nuevo movimiento',
-              style: TextStyle(
-                backgroundColor: Colors.black,
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.normal,
+    return Card(
+      margin: const EdgeInsets.all(10.0),
+      child: InkWell(
+        onTap: () => _onTapAddNewMovement(context),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.add_circle_outline,
+                size: 50,
+                color: Colors.deepPurple,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 10),
+              const Text(
+                'Añadir nuevo movimiento',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void _onTapAddNewMovement(BuildContext context) {
+  void _onTapAddNewMovement(BuildContext context) async {
+    final newMovement = await Navigator.push<Movement>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PointSelectionPage(),
+      ),
+    );
+
+    if (newMovement != null) {
+      setState(() {
+        movements.add(newMovement);
+      });
+    }
+  }
+
+  void _onTapCamera(BuildContext context, Movement movement) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PointSelectionPage(), // Navigate to the new page
+        builder: (context) => CameraPage(MovementObject: movement),
       ),
     );
   }
 }
-
-  void _onTapCamera(BuildContext context, String movement){
-    //locator<ModelInferenceService>().setModelConfig(index);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CameraPage(movement: movement),
-      ),
-    );
-  }
-

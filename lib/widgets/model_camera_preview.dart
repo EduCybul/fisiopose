@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:fisiopose/utils/Movement.dart';
@@ -12,14 +13,12 @@ class ModelCameraPreview extends StatefulWidget {
     super.key,
     required this.cameraController,
     required this.movement,
-    required this.MovementObject,
     required this.draw,
     this.imageData,
   });
 
   final CameraController? cameraController;
-  final String? movement;
-  final Movement? MovementObject;
+  final Movement? movement;
   final bool draw;
   final Uint8List? imageData;
 
@@ -116,47 +115,67 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
     final points =  convertPoints((inferenceResultsImage ?? inferenceResults ?? [] ) as Map<String,dynamic>);
 
 
+
     //final keypoints = _extractKeypoints(inferenceResults);
 
     double? angle;
+    double? completionPercentage;
     if (points.isNotEmpty) {
       if (widget.movement != null) {
-        angle = _calculateAngleForMovement(widget.movement!, points);
-      } else if (widget.MovementObject != null) {
-        angle = _angleCalculator.calculateAngleFromObject(widget.MovementObject!, points);
+        angle = _calculateAngleForMovement(widget.movement!.movementName!, points);
+      } else if (widget.movement != null) {
+        angle = _angleCalculator.calculateAngleFromObject(widget.movement!, points);
+      }
+
+      if (angle != null && widget.movement != null) {
+         completionPercentage = widget.movement!.calculateCompletionPercentage(angle);
       }
     }
 
     return Stack(
-      children: [
-        if (widget.imageData != null)
-          Image.memory(widget.imageData!)
-        else
-          CameraPreview(widget.cameraController!),
-        Visibility(
-          visible: true,
-          child: CustomPaint(
-            painter: PosePainter(
-              points:  points,//inferenceResults?['point'] ?? [],
-              ratio: _ratio,
+        children: [
+          if (widget.imageData != null)
+            Image.memory(widget.imageData!)
+          else
+            CameraPreview(widget.cameraController!),
+          Visibility(
+            visible: true,
+            child: CustomPaint(
+              painter: PosePainter(
+                points:  points,//inferenceResults?['point'] ?? [],
+                ratio: _ratio,
+              ),
             ),
           ),
-        ),
-        if(angle != null)
-            Positioned(
-              top: 10,
-              left: 10,
-              child: Text(
-                'Angle: ${angle.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+          if(angle != null)
+              Positioned(
+                top: 10,
+                left: 10,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                 Text(
+                  'Angle: ${angle.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-        ),
-      ],
-    );
+                if(completionPercentage != null)
+                  Text(
+                    'Completion: ${completionPercentage.toStringAsFixed(2)}%',
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
   }
 }
 

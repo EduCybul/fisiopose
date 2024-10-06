@@ -1,6 +1,5 @@
 import 'dart:isolate';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:camera/camera.dart';
 

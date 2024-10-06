@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
 import 'package:image/image.dart' as image_lib;

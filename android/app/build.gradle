@@ -70,4 +70,5 @@ flutter {
 
 dependencies {
     implementation 'org.tensorflow:tensorflow-lite-gpu:2.4.0'
+    implementation 'io.flutter:flutter_embedding_debug:1.0.0'
 }
