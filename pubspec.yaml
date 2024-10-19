@@ -39,7 +39,7 @@ dependencies:
   flutter_screenutil: ^5.9.0
 
   # tensorflow
-  tflite_flutter: ^0.9.5
+  tflite_flutter: ^0.11.0
   tflite_flutter_helper: ^0.2.1
   tflite_flutter_helper_plus: ^0.0.2
 
@@ -49,10 +49,12 @@ dependencies:
   # image
   camera: ^0.10.5+9
   image: ^3.3.0
+  image_picker: ^0.8.4+4
 
   # data
   get_it: ^7.6.7
   equatable: ^2.0.5
+  permission_handler: ^10.2.0
 
 dev_dependencies:
   flutter_test:

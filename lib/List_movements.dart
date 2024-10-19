@@ -16,13 +16,13 @@ class ListMovements extends StatefulWidget {
 
 class _ListMovementsState extends State<ListMovements> {
   List<Movement> movements = [
-    Movement(movementName: 'Flexion hombro derecho', keypoints: [14, 12, 24], maxAngle: 90),
-    Movement(movementName: 'Flexion hombro izquierdo', keypoints: [13, 11, 23], maxAngle: 90),
-    Movement(movementName: 'Flexion cadera izquierda', keypoints: [28, 24, 27], maxAngle: 90),
-    Movement(movementName: 'Flexion cadera derecha', keypoints: [27, 23, 28], maxAngle: 90),
-    Movement(movementName: 'Flexion codo', keypoints: [16, 14, 12], maxAngle: 90),
-    Movement(movementName: 'Abduccion hombro', keypoints: [14, 12, 24], maxAngle: 90),
-    Movement(movementName: 'Flexion muneca derecha', keypoints: [18, 16, 14], maxAngle: 90),
+    Movement(movementName: 'Flexion hombro derecho', keypoints: [14, 12, 24], maxAngle: 90, imagepath: 'assets/image/flexion-hombro-derecho.png'),
+    Movement(movementName: 'Flexion hombro izquierdo', keypoints: [13, 11, 23], maxAngle: 90,  imagepath: 'assets/image/flexion-hombro-izquierdo.png'),
+    Movement(movementName: 'Flexion cadera izquierda', keypoints: [28, 24, 27], maxAngle: 90, imagepath: 'assets/image/flexion-cadera-izquierda.png'),
+    Movement(movementName: 'Flexion cadera derecha', keypoints: [27, 23, 28], maxAngle: 90,  imagepath: 'assets/image/flexion-cadera-derecha.png'),
+    Movement(movementName: 'Flexion codo', keypoints: [16, 14, 12], maxAngle: 90,  imagepath: 'assets/image/flexion-codos.png'),
+    Movement(movementName: 'Abduccion hombro', keypoints: [14, 12, 24], maxAngle: 90,  imagepath: 'assets/image/flexion_hombro_frontal.png'),
+    Movement(movementName: 'Flexion muneca derecha', keypoints: [18, 16, 14], maxAngle: 90,  imagepath: 'assets/image/flexion-hombro-derecho.png'),
   ];
 
   @override
@@ -69,15 +69,15 @@ class _ListMovementsState extends State<ListMovements> {
 
   Widget _movementItem(BuildContext context, Movement movement) {
     return Card(
-      margin: const EdgeInsets.all(10.0),
+      margin: const EdgeInsets.all(20.0),
       child: InkWell(
         onTap: () => _onTapCamera(context, movement),
         child: Padding(
-          padding: const EdgeInsets.all(2.0),
+          padding: const EdgeInsets.all(10.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/image/fisio.png', scale: 10), // Placeholder image
+              Image.asset(movement.imagepath, scale: 2), // Placeholder image
               const SizedBox(height: 10),
               Text(
                 movement.movementName,

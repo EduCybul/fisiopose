@@ -127,7 +127,7 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
         angle = _angleCalculator.calculateAngleFromObject(widget.movement!, points);
       }
 
-      if (angle != null && widget.movement != null) {
+      if (angle != null && widget.movement != null) { 
          completionPercentage = widget.movement!.calculateCompletionPercentage(angle);
       }
     }

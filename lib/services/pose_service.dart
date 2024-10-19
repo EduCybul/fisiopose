@@ -8,7 +8,6 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
 
 import 'package:tflite_flutter_helper/tflite_flutter_helper.dart' as helper;
-import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 
 import '../../utils/image_utils.dart';
 import 'package:fisiopose/services/ai_model.dart';

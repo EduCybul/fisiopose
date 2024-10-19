@@ -1,6 +1,8 @@
 import 'package:fisiopose/utils/Movement.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'camera_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PointSelectionPage extends StatefulWidget {
   @override
@@ -16,6 +18,33 @@ class _PointSelectionPageState extends State<PointSelectionPage> {
   int? selectedKeypoint3;
   String movementName = '';
   int? maxAngle;
+  String? imagePath;
+
+  Future<void> _pickImage() async {
+    PermissionStatus status = await Permission.storage.status;
+
+    if (status.isDenied) {
+      status = await Permission.storage.request();
+    }
+
+    if (status.isGranted) {
+      final ImagePicker _picker = ImagePicker();
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        setState(() {
+          imagePath = image.path;
+        });
+      }
+    } else {
+      // Handle the case when the permission is not granted
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Storage permission is required to pick images.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +150,11 @@ class _PointSelectionPageState extends State<PointSelectionPage> {
                 ),
               ),
               const SizedBox(height: 5),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: const Text('Seleccionar Imagen'),
+              ),
+              const SizedBox(height: 5),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -128,11 +162,13 @@ class _PointSelectionPageState extends State<PointSelectionPage> {
                         selectedKeypoint1 != null &&
                         selectedKeypoint2 != null &&
                         selectedKeypoint3 != null &&
-                        maxAngle != null) {
+                        maxAngle != null &&
+                        imagePath != null) {
                       Movement movement = Movement(
                         movementName: movementName,
                         keypoints: [selectedKeypoint1!, selectedKeypoint2!, selectedKeypoint3!],
                         maxAngle: maxAngle!,
+                        imagepath: imagePath!,
                       );
                       Navigator.pop(context, movement);
                     } else {
