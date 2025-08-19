@@ -1,8 +1,10 @@
 import 'package:fisiopose/utils/Movement.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Para rootBundle
 import 'package:image_picker/image_picker.dart';
-import 'camera_page.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class PointSelectionPage extends StatefulWidget {
   @override
@@ -13,17 +15,43 @@ class _PointSelectionPageState extends State<PointSelectionPage> {
   List<int> keypoints = List<int>.generate(33, (int index) => index);
   List<int> Angulos = [180, 90];
 
+  List<String> availableModels = [];
   int? selectedKeypoint1;
   int? selectedKeypoint2;
   int? selectedKeypoint3;
   String movementName = '';
   int? maxAngle;
   String? imagePath;
+  String? selectedModelName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadModelList();
+  }
+
+  Future<void> _loadModelList() async {
+    try {
+      final String modelsTxt = await rootBundle.loadString('assets/models/models.txt');
+      setState(() {
+        availableModels = modelsTxt
+            .split('\n')
+            .map((e) => e.trim())
+            .where((e) => e.endsWith('.tflite'))
+            .toList();
+      });
+    } catch (e) {
+      setState(() {
+        availableModels = [];
+      });
+    }
+  }
 
   Future<void> _pickImage() async {
-    PermissionStatus status = await Permission.storage.status;
-
-    if (status.isDenied) {
+    PermissionStatus status;
+    if (Platform.isAndroid && (await DeviceInfoPlugin().androidInfo).version.sdkInt >= 33) {
+      status = await Permission.photos.request();
+    } else {
       status = await Permission.storage.request();
     }
 
@@ -37,10 +65,9 @@ class _PointSelectionPageState extends State<PointSelectionPage> {
         });
       }
     } else {
-      // Handle the case when the permission is not granted
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Storage permission is required to pick images.'),
+          content: Text('Se requiere permiso para seleccionar imágenes.'),
         ),
       );
     }
@@ -150,11 +177,39 @@ class _PointSelectionPageState extends State<PointSelectionPage> {
                 ),
               ),
               const SizedBox(height: 5),
+              DropdownButtonFormField<String>(
+                value: selectedModelName,
+                items: availableModels.map((String model) {
+                  return DropdownMenuItem<String>(
+                    value: model,
+                    child: Text(model),
+                  );
+                }).toList(),
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedModelName = newValue;
+                  });
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Modelo TFLite',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 5),
               ElevatedButton(
                 onPressed: _pickImage,
                 child: const Text('Seleccionar Imagen'),
               ),
               const SizedBox(height: 5),
+              if (imagePath != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Image.file(
+                    File(imagePath!),
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -163,12 +218,14 @@ class _PointSelectionPageState extends State<PointSelectionPage> {
                         selectedKeypoint2 != null &&
                         selectedKeypoint3 != null &&
                         maxAngle != null &&
-                        imagePath != null) {
+                        imagePath != null &&
+                        selectedModelName != null) {
                       Movement movement = Movement(
                         movementName: movementName,
                         keypoints: [selectedKeypoint1!, selectedKeypoint2!, selectedKeypoint3!],
                         maxAngle: maxAngle!,
                         imagepath: imagePath!,
+                        modelName: selectedModelName!, // Usa el modelo seleccionado
                       );
                       Navigator.pop(context, movement);
                     } else {

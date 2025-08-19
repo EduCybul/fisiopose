@@ -1,0 +1,3 @@
+flexion_hombro_90.tflite
+abduccion_hombro.tflite
+flexion_codo.tflite

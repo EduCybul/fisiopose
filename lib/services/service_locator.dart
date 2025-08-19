@@ -4,7 +4,7 @@ import 'pose_service.dart';
 
 final locator = GetIt.instance;
 
-void setupLocator() {
+void  setupLocator() {
   locator.registerSingleton<Pose>(Pose());
   locator.registerLazySingleton<ModelInferenceService>(
           () => ModelInferenceService());

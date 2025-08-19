@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:fisiopose/utils/Movement.dart';
@@ -9,18 +8,20 @@ import '../utils/MovementAngleCalculator.dart';
 import 'pose_painter.dart';
 
 class ModelCameraPreview extends StatefulWidget {
-  const ModelCameraPreview({
+   ModelCameraPreview({
     super.key,
     required this.cameraController,
     required this.movement,
     required this.draw,
     this.imageData,
+    this.predictFisioResult,
   });
 
   final CameraController? cameraController;
   final Movement? movement;
   final bool draw;
   final Uint8List? imageData;
+  final double? predictFisioResult;
 
   @override
   ModelCameraPreviewState createState() => ModelCameraPreviewState();
@@ -31,6 +32,8 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
   Map<String, dynamic>? inferenceResultsImage;
   Map<String, dynamic>? inferenceResults;
   final MovementAngleCalculator _angleCalculator= MovementAngleCalculator();
+  double? predictFisioResult; // Make nullable without default value
+
 
   @override
   void initState() {
@@ -38,11 +41,18 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
     inferenceResults = locator<ModelInferenceService>().inferenceResults ?? {};
   }
 
+
   void updateInferenceResults(List<dynamic> pointss) {
     print('Received points: $pointss' );
     setState(() {
       inferenceResults = locator<ModelInferenceService>().inferenceResults ?? {};
       print('inferenceResultsImage:  $inferenceResults');
+    });
+  }
+
+  void updateInferenceFisio(double? predictFisioResult) {
+    setState(() {
+      this.predictFisioResult = predictFisioResult; // Update with provided value
     });
   }
 
@@ -105,30 +115,26 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
       return Container(
         color: Colors.black,
         child: const Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: Colors.blueAccent)
         ),
       );
     }
 
     final screenSize = MediaQuery.of(context).size;
     _ratio = screenSize.width / widget.cameraController!.value.previewSize!.height;
-    final points =  convertPoints((inferenceResultsImage ?? inferenceResults ?? [] ) as Map<String,dynamic>);
-
-
-
-    //final keypoints = _extractKeypoints(inferenceResults);
+    final points =  convertPoints((inferenceResultsImage ?? inferenceResults ?? {} ) as Map<String,dynamic>);
 
     double? angle;
     double? completionPercentage;
-    if (points.isNotEmpty) {
+
+    // Use state's predictFisioResult instead of widget.predictFisioResult
+    if (predictFisioResult == null && points.isNotEmpty) {
       if (widget.movement != null) {
-        angle = _calculateAngleForMovement(widget.movement!.movementName!, points);
-      } else if (widget.movement != null) {
-        angle = _angleCalculator.calculateAngleFromObject(widget.movement!, points);
+        angle = _calculateAngleForMovement(widget.movement!.movementName, points);
       }
 
-      if (angle != null && widget.movement != null) { 
-         completionPercentage = widget.movement!.calculateCompletionPercentage(angle);
+      if (angle != null && widget.movement != null) {
+        completionPercentage = widget.movement!.calculateCompletionPercentage(angle);
       }
     }
 
@@ -147,7 +153,7 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
               ),
             ),
           ),
-          if(angle != null)
+          if(angle != null && predictFisioResult == null)
               Positioned(
                 top: 10,
                 left: 10,
@@ -174,6 +180,19 @@ class ModelCameraPreviewState extends State<ModelCameraPreview> {
               ],
             ),
           ),
+          if(predictFisioResult != null)
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Text(
+                'Predicted model Percentage: $predictFisioResult',
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
         ],
       );
   }

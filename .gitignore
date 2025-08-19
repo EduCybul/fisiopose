@@ -47,3 +47,6 @@ pubspec.lock
 windows/flutter/generated_plugin_registrant.cc
 
 windows/flutter/generated_plugins.cmake
+
+# FVM Version Cache
+.fvm/

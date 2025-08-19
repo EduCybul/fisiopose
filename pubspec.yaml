@@ -39,9 +39,10 @@ dependencies:
   flutter_screenutil: ^5.9.0
 
   # tensorflow
-  tflite_flutter: ^0.11.0
+  tflite_flutter: ^0.9.0
   tflite_flutter_helper: ^0.2.1
   tflite_flutter_helper_plus: ^0.0.2
+  ffi: ^2.0.1
 
   # math
   scidart: ^0.0.2-dev.12
@@ -54,7 +55,8 @@ dependencies:
   # data
   get_it: ^7.6.7
   equatable: ^2.0.5
-  permission_handler: ^10.2.0
+  permission_handler: ^11.0.1
+  device_info_plus: ^11.3.0
 
 dev_dependencies:
   flutter_test:
@@ -85,11 +87,6 @@ flutter:
      - assets/image/fisio.png
      - assets/image/flexion-hombro-derecho.png
      - assets/image/flexion-hombro-izquierdo.png
-     - assets/models/flexionhombro90-frente.tflite
-     - assets/models/pose_landmark_full.tflite
-     - assets/models/pose_landmarks_detector.tflite
-     - assets/models/singlepose-lightning.tflite
-     - assets/models/modified_pose_landmark_full.tflite
      - assets/image/flexion-codos.png
      - assets/image/abduccion-hombro.jpg
      - assets/image/flexion_hombro_frontal.png
@@ -97,6 +94,13 @@ flutter:
      - assets/image/flexion-cadera-izquierda.png
      - assets/image/flexion-muneca-derecha.jpeg
      - assets/image/pose_landmarks_index.png
+     - assets/models/flexion_hombro_90.tflite
+     - assets/models/flexionhombro90-frente.tflite
+     - assets/models/pose_landmark_full.tflite
+     - assets/models/pose_landmarks_detector.tflite
+     - assets/models/modified_pose_landmark_full.tflite
+     - assets/models/models.txt
+     - assets/models/flexion_hombro_90_izq.tflite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

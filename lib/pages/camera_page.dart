@@ -34,7 +34,10 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   late IsolateUtils _isolateUtils;
   late IsolateUtils _isolateUtilsImage;
+  late IsolateUtils _isolateUtilsPoints;
   late ModelInferenceService _modelInferenceService;
+  double? _predictFisioResult;
+
 
   Uint8List? _captureImage;
   final GlobalKey<ModelCameraPreviewState> _modelCameraPreviewKey = GlobalKey<ModelCameraPreviewState>();
@@ -59,6 +62,8 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   void _initStateAsync() async {
     _isolateUtils = IsolateUtils();
     _isolateUtilsImage = IsolateUtils();
+    _isolateUtilsPoints = IsolateUtils();
+    await _isolateUtilsPoints.initIsolate();
     await _isolateUtilsImage.initIsolate();
     await _isolateUtils.initIsolate();
     await _initCamera();
@@ -108,7 +113,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       await _cameraController!.initialize().then((value) {
         if (!mounted) return;
       });
-      await _cameraController!.setFlashMode(FlashMode.off);//Asegurarnos de que el flash no se enciendan.
+      await _cameraController!.setFlashMode(FlashMode.off);//Asegurarnos de que el flash no se encienda.
     } on CameraException catch (e) {
       _showInSnackBar('Error: ${e.code}\n${e.description}');
     }
@@ -130,13 +135,11 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(360, 690));
     //_minTextAdapt = ScreenUtil().setSp(12);
-
-
     return PopScope(
       canPop: true,
       onPopInvoked: (didPop) {
         if (_isRun) {
-          _imageStreamToggle;
+          //_imageStreamToggle;
         }
       },
       child: Scaffold(
@@ -148,6 +151,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           movement: widget.MovementObject,
           draw: _draw,
           imageData: _captureImage,
+          predictFisioResult: _predictFisioResult,
         ),
         floatingActionButton: _buildFloatingActionButton,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -184,15 +188,23 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           Icons.add_a_photo,
         ),
       ),
-      IconButton(
+/*
+  IconButton(
         onPressed: () => _imageStreamToggle,
         color: Colors.white,
         iconSize: ScreenUtil().setWidth(30.0),
         icon: const Icon(
           Icons.filter_center_focus,
         ),
-      ),
-    ],
+      ),*/
+  IconButton(
+      onPressed: () => _FisioToggle,
+        color: Colors.white,
+        iconSize: ScreenUtil().setWidth(30.0),
+        icon: const Icon(
+        Icons.analytics,
+                      ),
+          )],
   );
 
   void get _imageToggle async {
@@ -213,26 +225,49 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         ?? locator<ModelInferenceService>().inferenceResults?['point'] ?? [];
     _modelCameraPreviewKey.currentState?.updateInferenceResults(points);
   }
-  void get  _imageStreamToggle{
+  Map<String, double> flattenPoints(List<Map<String, double>> points, double imageWidth, double imageHeight) {
+    final Map<String, double> flattened = {};
+    for (int i = 0; i < points.length; i++) {
+      flattened['x$i'] = points[i]['x']! / imageWidth;
+      flattened['y$i'] = points[i]['y']! / imageHeight;
+      flattened['z$i'] = points[i]['z']! / imageWidth;
+    }
+    return flattened;
+  }
+  void get _FisioToggle async {
+    final XFile imageFile = await _cameraController!.takePicture() ;
+    final Uint8List imageData = await imageFile.readAsBytes();
     setState(() {
-      _draw = !_draw;
+      _draw = true;
+      _captureImage = imageData;
     });
 
-    _isRun = !_isRun;
-    if (_isRun) {
 
-      _cameraController!.startImageStream(
-            (CameraImage cameraImage) async {
-              await _inference(cameraImage: cameraImage);
-              final points = locator<ModelInferenceService>().inferenceResults?['point']
-                  ?? locator<ModelInferenceService>().inferenceResults?['point'] ?? [];
-              print('Points from inference: $points');
-              _modelCameraPreviewKey.currentState?.updateInferenceResults(points);
-            },
-      );
-    } else {
-      _cameraController!.stopImageStream();
-    }
+    await _inferenceWithImage(imageData);
+    final points = locator<ModelInferenceService>().inferenceResults?['point']
+        ?? locator<ModelInferenceService>().inferenceResults?['point'] ?? [];
+
+  print('Starting inference with Points');
+  print('Points: $points');
+  // Obtener el tamaño de la imagen de la cámara
+  final double imageWidth = _cameraController?.value.previewSize?.width ?? 1.0;
+  final double imageHeight = _cameraController?.value.previewSize?.height ?? 1.0;
+  final flattenedPoints = flattenPoints(points, imageWidth, imageHeight);
+  print('Flatten points: $flattenedPoints');
+
+    await _modelInferenceService.inferencePoints(
+      isolateUtils: _isolateUtilsPoints,
+      points: flattenedPoints,
+      fisioModelName: widget.MovementObject?.modelName,
+    );
+    final result = locator<ModelInferenceService>().predictFisioResult?['inference'];
+    setState( (){
+      _predictFisioResult = result;
+    });
+
+    // Pass the points and result to update methods
+    _modelCameraPreviewKey.currentState?.updateInferenceResults(points);
+    _modelCameraPreviewKey.currentState?.updateInferenceFisio(result);
   }
 
   void get _cameraDirectionToggle {
@@ -247,6 +282,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       _onNewCameraSelected(_cameras.first);
     }
   }
+
   Future<void> _inferenceWithImage(Uint8List imageData) async {
     if (!mounted) return;
 
@@ -273,6 +309,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       });
     }
   }
+
+
+
+
+
+/*
   Future<void> _inference({required CameraImage cameraImage}) async {
     if (!mounted) return;
 
@@ -308,5 +350,6 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       });
     }
   }
-
+*/
 }
+
